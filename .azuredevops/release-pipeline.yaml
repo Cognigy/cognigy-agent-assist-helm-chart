@@ -1,0 +1,248 @@
+trigger:
+  branches:
+    include:
+      - release/*
+
+resources:
+  repositories:
+    - repository: AgentAssistBackend
+      type: git
+      name: agent-assist-backend
+    - repository: AgentAssistFrontend
+      type: git
+      name: agent-assist-frontend
+    - repository: FluxFleetNonProd
+      type: git
+      name: Cognigy.AI/flux-fleet-non-prod
+    # - repository: GitHubLiveAgent
+    #   type: github
+    #   endpoint: github.com_mayrbenjamin92
+    #   name: Cognigy/cognigy-live-agent-helm-chart
+
+variables:
+  - group: acr-prod
+  - name: DOCKER_BUILDKIT
+    value: 1
+
+name: agent-assist-app-cd-$(BuildId)
+
+pool:
+  vmImage: ubuntu-20.04
+
+stages:
+  - stage: createOrUpdateRelease
+    displayName: Create or Update Release
+    jobs:
+      - job: setOrUpdateReleaseVersion
+        displayName: Set or Update Release Version
+        steps:
+          - checkout: self
+            persistCredentials: "true"
+            clean: "true"
+
+          - bash: |
+              version="$(echo "$(Build.SourceBranch)" | sed "s/^.*release\/\(.*\)$/\1/")"
+
+              echo "Setting as release version: $version"
+
+              git config --global user.email "live-agent-ci@cognigy.com"
+              git config --global user.name "Live Agent CI"
+
+              git fetch origin release/$version
+
+              git checkout release/$version
+
+              # set version with buildId to make Flux detect the change
+              versionWithBuildId="$version-$(Build.BuildId)"
+              chartFile="./Chart.yaml"
+
+              echo "Setting as app version: $versionWithBuildId and version: $versionWithBuildId"  
+
+              yq e "(.version = \"$versionWithBuildId\") | (.appVersion = \"$versionWithBuildId\")" $chartFile > Chart-updated.yaml
+              diff -U0 -w -b --ignore-blank-lines $chartFile Chart-updated.yaml > Chart.diff
+              patch $chartFile < Chart.diff
+              rm Chart.diff Chart-updated.yaml
+
+              git add .
+              git commit -m "[skip ci] Update Chart.yaml - appVersion: $versionWithBuildId | version: $versionWithBuildId"
+
+              git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" push -u origin HEAD
+
+              echo "##vso[task.setvariable variable=releaseVersion;isOutput=true]$version"
+            name: setReleaseVersionAndUpdateChart
+            displayName: "Set Release Version And Update Chart.yaml"
+
+      - job: createAgentAssistBackendReleaseBranch
+        displayName: Create agent-assist-backend Release Branch
+        dependsOn: setOrUpdateReleaseVersion
+        variables:
+          releaseVersion: $[ dependencies.setOrUpdateReleaseVersion.outputs['setReleaseVersionAndUpdateChart.releaseVersion'] ]
+        steps:
+          - checkout: AgentAssistBackend
+            persistCredentials: "true"
+            clean: "true"
+
+          - bash: |
+              git config --global user.email "live-agent-ci@cognigy.com"
+              git config --global user.name "Live Agent CI"
+
+              releaseBranch="release/$(releaseVersion)"
+
+              git fetch --all
+
+              git checkout "$releaseBranch" 2>/dev/null || (git checkout -b "$releaseBranch" && git push -u origin $releaseBranch)
+            displayName: "Create Release Branch"
+
+      - job: createAgentAssistFrontendReleaseBranch
+        displayName: Create agent-assist-frontend Release Branch
+        dependsOn: setOrUpdateReleaseVersion
+        variables:
+          releaseVersion: $[ dependencies.setOrUpdateReleaseVersion.outputs['setReleaseVersionAndUpdateChart.releaseVersion'] ]
+        steps:
+          - checkout: AgentAssistFrontend
+            persistCredentials: "true"
+            clean: "true"
+
+          - bash: |
+              git config --global user.email "live-agent-ci@cognigy.com"
+              git config --global user.name "Live Agent CI"
+
+              releaseBranch="release/$(releaseVersion)"
+
+              git fetch --all
+
+              git checkout "$releaseBranch" 2>/dev/null || (git checkout -b "$releaseBranch" && git push -u origin $releaseBranch)
+            displayName: "Create Release Branch"
+  - stage: stagingDeployment
+    displayName: Staging Deployment
+    dependsOn:
+      - createOrUpdateRelease
+    variables:
+      releaseVersion: $[stageDependencies.createOrUpdateRelease.setOrUpdateReleaseVersion.outputs['setReleaseVersionAndUpdateChart.releaseVersion']]
+    jobs:
+      - job: updateFluxFleetNonProdStagingV4
+        displayName: Update flux-fleet-non-prod staging-v4
+        steps:
+          - checkout: FluxFleetNonProd
+            persistCredentials: "true"
+            clean: "true"
+
+          - bash: |
+              git config --global user.email "live-agent-ci@cognigy.com"
+              git config --global user.name "Live Agent CI"
+
+              git fetch --all
+
+              git checkout master
+
+              echo "release: $(releaseVersion)"
+
+              agentAssistSyncPath="./aws/eu-central-1/staging-v4/agent-assist"
+
+              yq e -i 'select(.kind == "GitRepository").spec.ref.branch |= "release/$(releaseVersion)"' $agentAssistSyncPath/sync.yaml
+
+              git add .
+
+              if [[ `git status --porcelain` ]]; then
+                commitMessage="Updated staging-v4 agent-assist to release $(releaseVersion)"
+
+                echo "$commitMessage"
+
+                git commit -m "$commitMessage"
+
+                git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" push
+              else
+                echo "staging-v4 agent-assist already references this release, no changes pushed"
+              fi
+            displayName: "Update release branch reference"
+
+  - stage: publishRelease
+    displayName: Publish Release
+    dependsOn:
+      - createOrUpdateRelease
+      - stagingDeployment
+    variables:
+      releaseVersion: $[stageDependencies.createOrUpdateRelease.setOrUpdateReleaseVersion.outputs['setReleaseVersionAndUpdateChart.releaseVersion']]
+    jobs:
+      - deployment: performPublishRelease
+        displayName: Perform Publish Release
+        environment: production
+        variables:
+          ACRPath: helm
+          chartName: "agent-assist"
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                  persistCredentials: "true"
+                  clean: "true"
+
+                # - checkout: GitHubLiveAgent
+                #   persistCredentials: "true"
+                #   clean: "true"
+
+                - task: HelmInstaller@0
+                  displayName: Install Helm 3.8.2
+                  inputs:
+                    helmVersion: 3.8.2
+                    checkLatestHelmVersion: false
+
+                - task: Docker@2
+                  displayName: Login into container registry
+                  inputs:
+                    command: "login"
+                    containerRegistry: $(containerProductionRegistryReference)
+
+                - bash: |
+                    git config --global user.email "live-agent-ci@cognigy.com"
+                    git config --global user.name "Live Agent CI"
+
+                    git fetch --all
+
+                    git checkout release/$(releaseVersion) && git pull
+
+                    chartFile="./Chart.yaml"
+
+                    echo "Setting as version: $(releaseVersion)"  
+
+                    # Remove buildId from version as it is not necessary for Trial and App deployments
+                    yq e '.version = "$(releaseVersion)"' $chartFile > Chart-updated.yaml
+                    diff -U0 -w -b --ignore-blank-lines $chartFile Chart-updated.yaml > Chart.diff
+                    patch $chartFile < Chart.diff
+                    rm Chart.diff Chart-updated.yaml
+
+                    git add .
+                    git commit -m "[skip ci] remove buildId from Chart.yaml version: $(releaseVersion)"
+
+                    # Create new release tag
+                    git tag -a "v$(releaseVersion)" -m "version $(releaseVersion)"
+
+                    git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" push --follow-tags -u origin HEAD
+
+                    helm version
+                    helmChartVersion="$(yq e '.version' Chart.yaml)"
+
+                    echo "Helm Chart" $(chartName) "version:" $helmChartVersion
+
+                    helm package  .
+                    helm push ./$(chartName)-$helmChartVersion.tgz oci://$(containerProductionRegistry)/$(ACRPath)
+
+                    # COMMENTED OUT FOR NOW AS WE ARE NOT PUBLISHING THE HELM CHART TO GITHUB
+                    # # Change to the GitHub repository for Cognigy Live Agent Helm charts
+                    # cd ../../cognigy-live-agent-helm-chart
+
+                    # git checkout main
+
+                    # # Copy Helm chart package and add it to the root folder
+                    # mv ../live-agent-app/cognigy-live-agent/$(chartName)-$helmChartVersion.tgz ./
+
+                    # git add .
+
+                    # git commit -m "$(releaseVersion) Helm chart"
+
+                    # # Create new release tag
+                    # git tag -a "v$(releaseVersion)" -m "$(releaseVersion) Helm chart"
+
+                    # git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" push --follow-tags -u origin HEAD
+                  displayName: "Create release tag and publish Helm chart"

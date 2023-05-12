@@ -1,0 +1,71 @@
+{{- if .Values.frontend.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "agent-assist-frontend.fullname" . }}
+  labels:
+    {{- include "agent-assist.labels" . | nindent 4 }}
+spec:
+  replicas: {{ int .Values.frontend.replica }}
+  selector:
+    matchLabels:
+      {{- include "agent-assist.selectorLabels" . | nindent 6 }}
+      role: frontend
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "agent-assist.selectorLabels" . | nindent 8 }}
+        role: frontend
+    spec:
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector: {{- include "common.tplvalues.render" (dict "value" .Values.nodeSelector "context" $) | nindent 8 }}
+      {{- end }}
+      {{- include "image.pullSecrets" $ | nindent 6 }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - envFrom:
+            - configMapRef:
+                name: {{ template "agent-assist-frontend.fullname" . }}
+          env:
+            - name: APP_ACCESS_TOKEN_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "agent-assist.backend.apiKey" . }}
+                  key: api-key
+          image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag | default .Chart.AppVersion }}"
+          name: {{ .Chart.Name }}-app
+          ports:
+            - name: app
+              containerPort: {{ int .Values.frontend.service.internalPort }}
+            - name: metrics
+              containerPort: {{ int .Values.frontend.metrics.port | default 8002  }}
+            - name: health
+              containerPort: {{ int .Values.frontend.health.port | default 8001  }}
+          imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+          {{- with .Values.frontend.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          startupProbe:
+            httpGet:
+              path: /health/startup
+              port: {{ int .Values.frontend.health.port | default 8001 }}
+          livenessProbe:
+            httpGet:
+              path: /health/liveness
+              port: {{ int .Values.frontend.health.port | default 8001  }}
+            failureThreshold: 3
+            initialDelaySeconds: 90
+            periodSeconds: 60
+            timeoutSeconds: 10
+status: {}
+{{- end }}

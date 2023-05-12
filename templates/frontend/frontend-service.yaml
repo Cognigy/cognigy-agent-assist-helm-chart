@@ -1,0 +1,24 @@
+{{- if .Values.frontend.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "agent-assist-frontend.fullname" . }}
+  creationTimestamp: null
+  labels:
+    {{- include "agent-assist.selectorLabels" . | nindent 8 }}
+  {{- with .Values.frontend.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  ports:
+    - name: {{ .Values.frontend.service.name | quote}}
+      port: {{ int .Values.frontend.service.internalPort }}
+      targetPort: {{ int .Values.frontend.service.targetPort }}
+  type: {{ .Values.frontend.service.type }}
+  selector:
+    {{- include "agent-assist.selectorLabels" . | nindent 4 }}
+    role: frontend
+status:
+  loadBalancer: {}
+{{- end }}

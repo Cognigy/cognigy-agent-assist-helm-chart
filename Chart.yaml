@@ -1,0 +1,13 @@
+apiVersion: v2
+name: agent-assist
+description: A Helm chart to deploy Cognigy Agent Assist
+
+type: application
+version: "4.51.0-82336"
+appVersion: "4.51.0-82336"
+icon: https://liveagent-trial.cognigy.ai/apple-icon-180x180.png
+dependencies:
+  - name: redis
+    version: "15.7.6"
+    repository: https://charts.bitnami.com/bitnami
+    condition: redis.enabled

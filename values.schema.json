@@ -1,0 +1,629 @@
+{
+	"$schema": "http://json-schema.org/schema#",
+	"type": "object",
+	"required": [
+		"frontend",
+		"backend",
+		"podAnnotations",
+		"podSecurityContext",
+		"securityContext",
+		"loadTestingMode"
+	],
+	"properties": {
+		"imageCredentials": {
+			"description": "Docker registry credentials",
+			"type": "object",
+			"properties": {
+				"registry": {
+					"description": "URL for the registry",
+					"type": "string"
+				},
+				"username": {
+					"description": "Username for the registry",
+					"type": "string"
+				},
+				"password": {
+					"description": "Password for the registry",
+					"type": "string"
+				},
+				"pullSecrets": {
+					"description": "Existing secrets for the registry login",
+					"type": "array"
+				}
+			},
+			"anyOf": [
+				{
+					"required": ["registry", "username", "password"]
+				},
+				{
+					"required": ["pullSecrets"]
+				}
+			]
+		},
+		"backend": {
+			"type": "object",
+			"required": [
+				"replica",
+				"image",
+				"service",
+				"ingress",
+				"resources",
+				"configmap"
+			],
+			"properties": {
+				"image": {
+					"type": "object",
+					"required": ["repository", "pullPolicy", "tag"],
+					"properties": {
+						"repository": {
+							"type": "string",
+							"pattern": "^[a-z0-9-_/.]+$"
+						},
+						"pullPolicy": {
+							"type": "string",
+							"pattern": "^(Always|Never|IfNotPresent)$"
+						},
+						"tag": {
+							"type": "string"
+						}
+					}
+				},
+				"replica": {
+					"type": "number"
+				},
+				"service": {
+					"type": "object",
+					"required": [
+						"name",
+						"internalPort",
+						"targetPort",
+						"type",
+						"annotations"
+					],
+					"properties": {
+						"name": {
+							"type": "string"
+						},
+						"internalPort": {
+							"type": "number"
+						},
+						"targetPort": {
+							"type": "number"
+						},
+						"type": {
+							"type": "string",
+							"enum": ["ExternalName", "ClusterIP", "NodePort", "LoadBalancer"]
+						},
+						"annotations": {
+							"type": "object"
+						}
+					}
+				},
+				"ingress": {
+					"type": "object",
+					"required": ["enabled", "hosts"],
+					"properties": {
+						"enabled": {
+							"type": "boolean"
+						},
+						"annotations": {
+							"type": "object"
+						},
+						"hosts": {
+							"type": "array",
+							"minItems": 1,
+							"items": {
+								"type": "object",
+								"required": ["host", "paths"],
+								"properties": {
+									"host": {
+										"type": "string"
+									},
+									"paths": {
+										"type": "array",
+										"minItems": 1,
+										"items": {
+											"type": "object",
+											"required": ["path", "pathType"],
+											"properties": {
+												"path": {
+													"type": "string"
+												},
+												"pathType": {
+													"type": "string",
+													"enum": ["ImplementationSpecific", "Prefix", "Exact"]
+												}
+											}
+										}
+									}
+								}
+							}
+						},
+						"tls": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"required": ["secretName"],
+								"properties": {
+									"secretName": {
+										"type": "string"
+									},
+									"hosts": {
+										"type": "array",
+										"items": {
+											"type": "string"
+										},
+										"minItems": 1
+									}
+								}
+							}
+						}
+					}
+				},
+				"resources": {
+					"type": "object",
+					"properties": {
+						"limits": {
+							"type": "object",
+							"properties": {
+								"cpu": {
+									"type": "string"
+								},
+								"memory": {
+									"type": "string"
+								}
+							}
+						},
+						"requests": {
+							"type": "object",
+							"properties": {
+								"cpu": {
+									"type": "string"
+								},
+								"memory": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"health": {
+					"type": "object",
+					"properties": {
+						"port": {
+							"type": "number"
+						}
+					}
+				},
+				"metrics": {
+					"type": "object",
+					"properties": {
+						"port": {
+							"type": "number"
+						}
+					}
+				},
+				"apiKey": {
+					"type": "object",
+					"properties": {
+						"existingSecret": {
+							"type": "string"
+						},
+						"value": {
+							"type": "string"
+						}
+					}
+				},
+				"configmap": {
+					"type": "object",
+					"properties": {
+						"FRONTEND_URL": {
+							"type": "string"
+						}
+					}
+				}
+			}
+		},
+		"frontend": {
+			"type": "object",
+			"required": ["enabled"],
+			"properties": {
+				"enabled": {
+					"type": "boolean"
+				},
+				"image": {
+					"type": "object",
+					"required": ["repository", "pullPolicy", "tag"],
+					"properties": {
+						"repository": {
+							"type": "string",
+							"pattern": "^[a-z0-9-_/.]+$"
+						},
+						"pullPolicy": {
+							"type": "string",
+							"pattern": "^(Always|Never|IfNotPresent)$"
+						},
+						"tag": {
+							"type": "string"
+						}
+					}
+				},
+				"replica": {
+					"type": "number"
+				},
+				"service": {
+					"type": "object",
+					"required": [
+						"name",
+						"internalPort",
+						"targetPort",
+						"type",
+						"annotations"
+					],
+					"properties": {
+						"name": {
+							"type": "string"
+						},
+						"internalPort": {
+							"type": "number"
+						},
+						"targetPort": {
+							"type": "number"
+						},
+						"type": {
+							"type": "string",
+							"enum": ["ExternalName", "ClusterIP", "NodePort", "LoadBalancer"]
+						},
+						"annotations": {
+							"type": "object"
+						}
+					}
+				},
+				"ingress": {
+					"type": "object",
+					"required": ["enabled", "hosts"],
+					"properties": {
+						"enabled": {
+							"type": "boolean"
+						},
+						"annotations": {
+							"type": "object"
+						},
+						"hosts": {
+							"type": "array",
+							"minItems": 1,
+							"items": {
+								"type": "object",
+								"required": ["host", "paths"],
+								"properties": {
+									"host": {
+										"type": "string"
+									},
+									"paths": {
+										"type": "array",
+										"minItems": 1,
+										"items": {
+											"type": "object",
+											"required": ["path", "pathType"],
+											"properties": {
+												"path": {
+													"type": "string"
+												},
+												"pathType": {
+													"type": "string",
+													"enum": ["ImplementationSpecific", "Prefix", "Exact"]
+												}
+											}
+										}
+									}
+								}
+							}
+						},
+						"tls": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"required": ["secretName"],
+								"properties": {
+									"secretName": {
+										"type": "string"
+									},
+									"hosts": {
+										"type": "array",
+										"items": {
+											"type": "string"
+										},
+										"minItems": 1
+									}
+								}
+							}
+						}
+					}
+				},
+				"resources": {
+					"type": "object",
+					"properties": {
+						"limits": {
+							"type": "object",
+							"properties": {
+								"cpu": {
+									"type": "string"
+								},
+								"memory": {
+									"type": "string"
+								}
+							}
+						},
+						"requests": {
+							"type": "object",
+							"properties": {
+								"cpu": {
+									"type": "string"
+								},
+								"memory": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"configmap": {
+					"type": "object",
+					"properties": {}
+				}
+			}
+		},
+		"loadTestingMode": {
+			"type": "object",
+			"required": ["enabled"],
+			"properties": {
+				"enabled": {
+					"type": "boolean"
+				},
+				"testApiBridge": {
+					"type": "object",
+					"properties": {
+						"enabled": {
+							"type": "boolean"
+						},
+						"image": {
+							"type": "object",
+							"required": ["repository", "pullPolicy", "tag"],
+							"properties": {
+								"repository": {
+									"type": "string",
+									"pattern": "^[a-z0-9-_/.]+$"
+								},
+								"pullPolicy": {
+									"type": "string",
+									"pattern": "^(Always|Never|IfNotPresent)$"
+								},
+								"tag": {
+									"type": "string"
+								}
+							}
+						},
+						"replica": {
+							"type": "number"
+						},
+						"service": {
+							"type": "object",
+							"required": [
+								"name",
+								"internalPort",
+								"targetPort",
+								"type",
+								"annotations"
+							],
+							"properties": {
+								"name": {
+									"type": "string"
+								},
+								"internalPort": {
+									"type": "number"
+								},
+								"targetPort": {
+									"type": "number"
+								},
+								"type": {
+									"type": "string",
+									"enum": [
+										"ExternalName",
+										"ClusterIP",
+										"NodePort",
+										"LoadBalancer"
+									]
+								},
+								"annotations": {
+									"type": "object"
+								}
+							}
+						},
+						"ingress": {
+							"type": "object",
+							"required": ["enabled", "hosts"],
+							"properties": {
+								"enabled": {
+									"type": "boolean"
+								},
+								"annotations": {
+									"type": "object"
+								},
+								"hosts": {
+									"type": "array",
+									"minItems": 1,
+									"items": {
+										"type": "object",
+										"required": ["host", "paths"],
+										"properties": {
+											"host": {
+												"type": "string"
+											},
+											"paths": {
+												"type": "array",
+												"minItems": 1,
+												"items": {
+													"type": "object",
+													"required": ["path", "pathType"],
+													"properties": {
+														"path": {
+															"type": "string"
+														},
+														"pathType": {
+															"type": "string",
+															"enum": [
+																"ImplementationSpecific",
+																"Prefix",
+																"Exact"
+															]
+														}
+													}
+												}
+											}
+										}
+									}
+								},
+								"tls": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"required": ["secretName"],
+										"properties": {
+											"secretName": {
+												"type": "string"
+											},
+											"hosts": {
+												"type": "array",
+												"items": {
+													"type": "string"
+												},
+												"minItems": 1
+											}
+										}
+									}
+								}
+							}
+						},
+						"resources": {
+							"type": "object",
+							"properties": {
+								"limits": {
+									"type": "object",
+									"properties": {
+										"cpu": {
+											"type": "string"
+										},
+										"memory": {
+											"type": "string"
+										}
+									}
+								},
+								"requests": {
+									"type": "object",
+									"properties": {
+										"cpu": {
+											"type": "string"
+										},
+										"memory": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						},
+						"configmap": {
+							"type": "object",
+							"properties": {}
+						}
+					}
+				}
+			}
+		},
+		"nameOverride": {
+			"type": "string"
+		},
+		"fullnameOverride": {
+			"type": "string"
+		},
+		"podAnnotations": {
+			"type": "object",
+			"properties": {
+				"create": {
+					"type": "boolean"
+				},
+				"annotations": {
+					"type": "object"
+				},
+				"name": {
+					"type": "string"
+				}
+			}
+		},
+		"podSecurityContext": {
+			"type": "object",
+			"properties": {
+				"fsGroup": {
+					"type": "number"
+				}
+			}
+		},
+		"securityContext": {
+			"properties": {
+				"allowPrivilegeEscalation": {
+					"type": "boolean"
+				},
+				"capabilities": {
+					"type": "object"
+				},
+				"privileged": {
+					"type": "boolean"
+				},
+				"readOnlyRootFilesystem": {
+					"type": "boolean"
+				},
+				"runAsGroup": {
+					"type": "integer"
+				},
+				"runAsNonRoot": {
+					"type": "boolean"
+				},
+				"runAsUser": {
+					"type": "integer"
+				}
+			}
+		},
+		"nodeSelector": {
+			"type": "object",
+			"properties": {
+				"kubernetes.io/hostname": {
+					"type": "string"
+				}
+			}
+		},
+		"tolerations": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"key": {
+						"type": "string"
+					},
+					"operator": {
+						"type": "string",
+						"enum": ["Equal", "Exists", "GreaterThan", "LessThan"]
+					},
+					"value": {
+						"type": "string"
+					},
+					"effect": {
+						"type": "string",
+						"enum": ["NoSchedule", "Prevent", "Allow"]
+					},
+					"tolerationSeconds": {
+						"type": "integer"
+					}
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "agent-assist-backend.fullname" . }}
+  labels:
+    {{- include "agent-assist.labels" . | nindent 4 }}
+spec:
+  replicas: {{ int .Values.backend.replica }}
+  selector:
+    matchLabels:
+      {{- include "agent-assist.selectorLabels" . | nindent 6 }}
+      role: backend
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "agent-assist.selectorLabels" . | nindent 8 }}
+        role: backend
+    spec:
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector: {{- include "common.tplvalues.render" (dict "value" .Values.nodeSelector "context" $) | nindent 8 }}
+      {{- end }}
+      {{- include "image.pullSecrets" $ | nindent 6 }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - envFrom:
+            - configMapRef:
+                name: {{ template "agent-assist-backend.fullname" . }}
+          env:
+            - name: ACCESS_TOKEN_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "agent-assist.backend.apiKey" . }}
+                  key: api-key
+            - name: COGNIGY_AI_ENDPOINT_ACCESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "agent-assist.backend.cognigyServiceEndpointApiAccessToken" . }}
+                  key: api-access-token
+            - name: COGNIGY_AI_HANDOVER_ACCESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "agent-assist.backend.cognigyServiceHandoverApiAccessToken" . }}
+                  key: api-access-token
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
+          name: {{ .Chart.Name }}-app
+          ports:
+            - name: app
+              containerPort: {{ int .Values.backend.service.internalPort }}
+            - name: metrics
+              containerPort: {{ int .Values.backend.metrics.port | default 8002  }}
+            - name: health
+              containerPort: {{ int .Values.backend.health.port | default 8001  }}
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          {{- with .Values.backend.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          startupProbe:
+            httpGet:
+              path: /health/startup
+              port: {{ int .Values.backend.health.port | default 8001 }}
+          livenessProbe:
+            httpGet:
+              path: /health/liveness
+              port: {{ int .Values.backend.health.port | default 8001  }}
+            failureThreshold: 3
+            initialDelaySeconds: 90
+            periodSeconds: 60
+            timeoutSeconds: 10
+          volumeMounts:
+            - name: mongodb-connection-string
+              mountPath: /var/run/secrets/mongodbConnectionString
+              subPath: mongodbConnectionString
+            - name: redis-password
+              mountPath: /var/run/secrets/redis-password.conf
+              subPath: redis-password.conf
+      volumes:
+        - name: mongodb-connection-string
+          secret:
+            secretName: cognigy-agent-assist
+            items:
+              - key: connection-string
+                path: mongodbConnectionString
+        - name: redis-password
+          secret:
+            secretName: agent-assist-redis-password
+    
+status: {}

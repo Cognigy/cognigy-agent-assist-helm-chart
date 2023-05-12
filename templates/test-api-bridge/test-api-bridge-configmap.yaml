@@ -1,0 +1,17 @@
+{{- if .Values.loadTestingMode.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: {{ template "agent-assist-test-api-bridge.fullname" . }}
+  labels:
+    {{- include "agent-assist.labels" . | nindent 4 }}
+
+data:
+  NODE_ENV: 'production'
+  SERVER_HOST: '0.0.0.0'
+  SERVER_PORT: {{ .Values.loadTestingMode.testApiBridge.service.internalPort | quote }}
+{{ if .Values.loadTestingMode.testApiBridge.configmap }}
+{{ toYaml .Values.loadTestingMode.testApiBridge.configmap | nindent 2 }}
+{{ end }}
+{{- end }}

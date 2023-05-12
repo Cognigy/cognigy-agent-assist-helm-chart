@@ -1,0 +1,22 @@
+{{- if .Values.frontend.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: {{ template "agent-assist-frontend.fullname" . }}
+  labels:
+    {{- include "agent-assist.labels" . | nindent 4 }}
+
+data:
+  NODE_ENV: 'production'
+  SERVER_HOST: '0.0.0.0'
+  SERVER_PORT: {{ .Values.frontend.service.internalPort | quote }}
+  METRICS_PORT: {{ .Values.frontend.metrics.port | quote }}
+  HEALTH_PORT: {{ .Values.frontend.health.port | quote }}
+  {{- with (first .Values.backend.ingress.hosts) }}
+  APP_AGENT_ASSIST_API_URL: "https://{{ .host }}"
+  {{- end }}
+{{ if .Values.frontend.configmap }}
+{{ toYaml .Values.frontend.configmap | nindent 2 }}
+{{ end }}
+{{- end }}

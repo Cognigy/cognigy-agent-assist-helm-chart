@@ -1,0 +1,155 @@
+podAnnotations: {}
+
+podSecurityContext:
+  {}
+  # fsGroup: 2000
+
+securityContext:
+  {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+imageCredentials:
+  registry: "cognigy.azurecr.io"
+  username: ""
+  password: ""
+
+mongodb:
+  enabled: true
+  auth:
+    rootUser: root
+    rootPassword: ""
+  hosts: mongodb-0.mongodb-headless.mongodb.svc.cluster.local:27017
+
+backend:
+  image:
+    repository: cognigydevelopment.azurecr.io/agent-assist-backend
+    pullPolicy: IfNotPresent
+    tag: "abcdf680c478e56d0a1cd58f0d9af2833010ca33-1662397710"
+  replica: 1
+
+  service:
+    name: cognigy-agent-assist-backend
+    internalPort: 8000
+    targetPort: 8000
+    type: ClusterIP
+    annotations:
+      {}
+      # For example
+      #  service.beta.kubernetes.io/aws-load-balancer-type: external
+      #  service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+      #  service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+
+  ingress:
+    enabled: true
+    hosts:
+      - host: "agent-assist-api"
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                # Same value as service.name above
+                name: cognigy-agent-assist-backend
+                port:
+                  number: 8000
+    # tls:
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  # The API access token to use for authenticating the Backend with the Cognigy.AI endpoint
+  cognigyServiceEndpointApiAccessToken:
+    # Existing secret must have `api-access-token` as secret key
+    # existingSecret: ""
+    # Optionally create the secret by setting the api key here (not recommended)
+    value: ""
+
+  cognigyServiceHandoverApiAccessToken:
+    # Existing secret must have `api-access-token` as secret key
+    # existingSecret: ""
+    # Optionally create the secret by setting the api key here (not recommended)
+    value: ""
+
+  apiKey:
+    existingSecret: cognigy-agent-assist-api-key
+    # Optionally create the secret by setting the api key here (not recommended)
+    # value: ''
+
+  # Config map env variables
+  configmap:
+    FRONTEND_URL: "http://agent-assist.test"
+  resources:
+    {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 1000m
+    #   memory: 600Mi
+    # requests:
+    #   cpu: 1000m
+    #   memory: 400Mi
+
+frontend:
+  image:
+    repository: cognigydevelopment.azurecr.io/agent-assist-frontend
+    pullPolicy: IfNotPresent
+    tag: "d6563f67dc8bf9b4ae082c0f50e5b78c62c07e4b-1662492536"
+
+  replica: 1
+
+  service:
+    name: cognigy-agent-assist-frontend
+    internalPort: 8000
+    targetPort: 8000
+    type: ClusterIP
+    annotations:
+      {}
+      # For example
+      #  service.beta.kubernetes.io/aws-load-balancer-type: external
+      #  service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+      #  service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+
+  ingress:
+    enabled: true
+    hosts:
+      - host: "agent-assist-ui.test"
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                # Same value as service.name above
+                name: cognigy-agent-assist-frontend
+                port:
+                  number: 8000
+    # tls:
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  # Config map env variables
+  configmap: {}
+
+  resources:
+    {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 1000m
+    #   memory: 600Mi
+    # requests:
+    #   cpu: 1000m
+    #   memory: 400Mi
+
+nodeSelector: {}
+
+tolerations: []

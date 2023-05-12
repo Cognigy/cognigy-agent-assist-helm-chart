@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "agent-assist-backend.fullname" . }}
+  creationTimestamp: null
+  labels:
+    {{- include "agent-assist.selectorLabels" . | nindent 8 }}
+  {{- with .Values.backend.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  ports:
+    - name: {{ .Values.backend.service.name | quote}}
+      port: {{ int .Values.backend.service.internalPort }}
+      targetPort: {{ int .Values.backend.service.targetPort }}
+  type: {{ .Values.backend.service.type }}
+  selector:
+    {{- include "agent-assist.selectorLabels" . | nindent 4 }}
+    role: backend
+status:
+  loadBalancer: {}

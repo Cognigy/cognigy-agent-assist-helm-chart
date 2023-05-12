@@ -1,0 +1,124 @@
+fullnameOverride: "cognigy-agent-assist"
+mongodb:
+  enabled: true
+  auth:
+    rootUser: root
+    rootPassword: ""
+  # Connection string for MongoDB replica set deployed with Cognigy MongoDB Helm Chart into 3 availability zones:
+  hosts: mongodb-0.mongodb-headless.mongodb.svc.cluster.local:27017,mongodb-1.mongodb-headless.mongodb.svc.cluster.local:27017,mongodb-2.mongodb-headless.mongodb.svc.cluster.local:27017
+imageCredentials:
+  registry: "cognigy.azurecr.io"
+  username: ""
+  password: ""
+redis:
+  enabled: true
+  master:
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 200m
+        memory: 100Mi
+    persistence:
+      enabled: true
+      size: 1Gi
+  replica:
+    replicaCount: 1
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 200m
+        memory: 100Mi
+    persistence:
+      enabled: true
+      size: 1Gi
+  metrics:
+    enabled: true
+  serviceMonitor:
+    enabled: true
+backend:
+  image:
+    pullPolicy: IfNotPresent
+  service:
+    name: cognigy-agent-assist-backend
+    internalPort: 8000
+    targetPort: 8000
+    type: ClusterIP
+    annotations: {}
+  ingress:
+    enabled: true
+    hosts:
+      - host: ""
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                # Same value as service.name above
+                name: cognigy-agent-assist-backend
+                port:
+                  number: 8000
+    tls:
+      - hosts:
+          - ""
+        secretName: cognigy-traefik
+  cognigyServiceEndpointApiAccessToken:
+    existingSecret: cognigy-service-endpoint-api-access-token-aa
+  cognigyServiceHandoverApiAccessToken:
+    existingSecret: cognigy-service-handover-api-access-token-aa
+  apiKey:
+    existingSecret: agent-assist-api-key
+  configmap:
+    FRONTEND_URL: ""
+    ALLOWED_ORIGINS: ""
+    COGNIGY_AI_ENDPOINT_URL_WITH_PROTOCOL: ""
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 600Mi
+    requests:
+      cpu: 800m
+      memory: 400Mi
+frontend:
+  enabled: true
+  image:
+    pullPolicy: IfNotPresent
+  service:
+    name: cognigy-agent-assist-frontend
+    internalPort: 8000
+    targetPort: 8000
+    type: ClusterIP
+    annotations: {}
+  ingress:
+    enabled: true
+    hosts:
+      - host: ""
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                # Same value as service.name above
+                name: cognigy-agent-assist-frontend
+                port:
+                  number: 8000
+    tls:
+      # Careful with the indentation
+      # For more information, see https://helm.sh/docs/chart_template_guide/yaml_techniques/#strings-in-yaml
+      - hosts:
+          - ""
+        secretName: cognigy-traefik
+  configmap:
+    GOOGLE_MAPS_API_TOKEN: ""
+  resources:
+    limits:
+      cpu: 600m
+      memory: 600Mi
+    requests:
+      cpu: 400m
+      memory: 400Mi
+monitoring:
+  enabled: true

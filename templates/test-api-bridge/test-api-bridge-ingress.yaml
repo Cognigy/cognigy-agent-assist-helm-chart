@@ -1,0 +1,52 @@
+{{- if .Values.loadTestingMode.enabled -}}
+{{- if .Values.loadTestingMode.testApiBridge.ingress.enabled -}}
+{{- $ingressApiIsStable := eq (include "grafana.ingress.isStable" .) "true" -}}
+{{- $ingressSupportsPathType := eq (include "grafana.ingress.supportsPathType" .) "true" -}}
+apiVersion: {{ include "grafana.ingress.apiVersion" . }}
+kind: Ingress
+metadata:
+  name: {{ include "agent-assist-test-api-bridge.fullname" . }}
+  labels:
+    {{- include "agent-assist.selectorLabels" . | nindent 4 }}
+  {{- if .Values.loadTestingMode.testApiBridge.ingress.annotations }}
+  annotations:
+    {{- range $key, $value := .Values.loadTestingMode.testApiBridge.ingress.annotations }}
+    {{ $key }}: {{ tpl $value $ | quote }}
+    {{- end }}
+  {{- end }}
+spec:
+  ingressClassName: traefik
+  {{- if .Values.loadTestingMode.testApiBridge.ingress.tls }}
+  tls:
+    {{- range .Values.loadTestingMode.testApiBridge.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.loadTestingMode.testApiBridge.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            {{- if $ingressSupportsPathType }}
+            pathType: {{ .pathType }}
+            {{- end }}
+            backend:
+            {{- if $ingressApiIsStable }}
+              service:
+                name: {{ .backend.service.name }}
+                port:
+                  number: {{ int .backend.service.port.number }}
+            {{- else }}
+              serviceName: {{ .backend.service.name }}
+              servicePort: {{ int .backend.service.port.number }}
+            {{- end }}
+          {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end }}

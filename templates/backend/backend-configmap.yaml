@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: {{ template "agent-assist-backend.fullname" . }}
+  labels:
+    {{- include "agent-assist.labels" . | nindent 4 }}
+
+data:
+  NODE_ENV: 'production'
+  SERVER_HOST: '0.0.0.0'
+  SERVER_PORT: {{ .Values.backend.service.internalPort | quote }}
+  REDIS_HOST: {{template "agent-assist.redis.host" . }}
+{{ toYaml .Values.backend.configmap | nindent 2 }}

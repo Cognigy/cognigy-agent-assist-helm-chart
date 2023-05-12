@@ -1,0 +1,24 @@
+{{- if .Values.loadTestingMode.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "agent-assist-test-api-bridge.fullname" . }}
+  creationTimestamp: null
+  labels:
+    {{- include "agent-assist.selectorLabels" . | nindent 8 }}
+  {{- with .Values.loadTestingMode.testApiBridge.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  ports:
+    - name: {{ .Values.loadTestingMode.testApiBridge.service.name | quote}}
+      port: {{ int .Values.loadTestingMode.testApiBridge.service.internalPort }}
+      targetPort: {{ int .Values.loadTestingMode.testApiBridge.service.targetPort }}
+  type: {{ .Values.loadTestingMode.testApiBridge.service.type }}
+  selector:
+    {{- include "agent-assist.selectorLabels" . | nindent 4 }}
+    role: test-api-bridge
+status:
+  loadBalancer: {}
+{{- end }}

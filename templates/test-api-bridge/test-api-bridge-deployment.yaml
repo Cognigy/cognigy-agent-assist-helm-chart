@@ -1,0 +1,55 @@
+{{- if .Values.loadTestingMode.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "agent-assist-test-api-bridge.fullname" . }}
+  labels:
+    {{- include "agent-assist.labels" . | nindent 4 }}
+spec:
+  replicas: {{ int .Values.loadTestingMode.testApiBridge.replica }}
+  selector:
+    matchLabels:
+      {{- include "agent-assist.selectorLabels" . | nindent 6 }}
+      role: test-api-bridge
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "agent-assist.selectorLabels" . | nindent 8 }}
+        role: test-api-bridge
+    spec:
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector: {{- include "common.tplvalues.render" (dict "value" .Values.nodeSelector "context" $) | nindent 8 }}
+      {{- end }}
+      {{- include "image.pullSecrets" $ | nindent 6 }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - envFrom:
+            - configMapRef:
+                name: {{ template "agent-assist-test-api-bridge.fullname" . }}
+          env:
+            - name: AGENT_ASSIST_SOCKET_API_PASSPHRASE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "agent-assist.backend.apiKey" . }}
+                  key: api-key
+          image: "{{ .Values.loadTestingMode.testApiBridge.image.repository }}:{{ .Values.loadTestingMode.testApiBridge.image.tag | default .Chart.AppVersion }}"
+          name: {{ .Chart.Name }}-app
+          ports:
+            - name: app
+              containerPort: {{ int .Values.loadTestingMode.testApiBridge.service.internalPort }}
+          imagePullPolicy: {{ .Values.loadTestingMode.testApiBridge.image.pullPolicy }}
+          {{- with .Values.loadTestingMode.testApiBridge.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+status: {}
+{{- end }}
