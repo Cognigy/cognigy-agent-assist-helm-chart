@@ -90,12 +90,76 @@ mongodb:
 
 redis:
   enabled: true
-  nameOverride: redis
+  fullnameOverride: redis-ha
   auth:
     existingSecret: "agent-assist-redis-password"
     existingSecretPasswordKey: "REDIS_PASSWORD"
-  master:
+  image:
+    registry: docker.io
+    repository: bitnami/redis
+    tag: 7.0.7-debian-11-r7
+    pullSecrets: []
+  commonConfiguration: |-
+    appendonly no
+    protected-mode no
+    repl-diskless-sync no
+    save 60 1
+    stop-writes-on-bgsave-error no
+  replica:
+    replicaCount: 3
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 200m
+        memory: 100Mi
+    podLabels:
+      uniquezone: "aa-redis-ha"
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: "uniquezone"
+                  operator: In
+                  values:
+                    - "aa-redis-ha"
+            topologyKey: "topology.kubernetes.io/zone"
     persistence:
+      enabled: false
+  sentinel:
+    enabled: true
+    image:
+      registry: docker.io
+      repository: bitnami/redis-sentinel
+      tag: 7.0.7-debian-11-r6
+      pullSecrets: []
+    automateClusterRecovery: true
+    downAfterMilliseconds: 2000
+    failoverTimeout: 10000
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 200m
+        memory: 100Mi
+  metrics:
+    enabled: true
+    image:
+      registry: docker.io
+      repository: bitnami/redis-exporter
+      tag: 1.45.0-debian-11-r22
+      pullSecrets: []
+    resources:
+      limits:
+        cpu: 200m
+        memory: 200Mi
+      requests:
+        cpu: 50m
+        memory: 50Mi
+    serviceMonitor:
       enabled: true
 
 backend:
@@ -175,6 +239,11 @@ backend:
     REDIS_ENABLE_RECONNECT: "true"
     # Cognigy.AI integration (same for service-handover/service-endpoint)
     COGNIGY_AI_ENDPOINT_URL_WITH_PROTOCOL: ""
+    # Redis Sentinel enabled
+    FEATURE_REDIS_SENTINEL_MODE_ENABLED: "true"
+    REDIS_SENTINEL_PORT: "26379"
+    REDIS_SENTINEL_HOST: "redis-ha-headless"
+    REDIS_SENTINEL_MASTER_NAME: "mymaster"
   resources:
     {}
     # We usually recommend not to specify default resources and to leave this as a conscious
@@ -194,7 +263,7 @@ frontend:
   image:
     repository: cognigy.azurecr.io/agent-assist-frontend
     pullPolicy: IfNotPresent
-    tag: "b742161378ff644cf1bd9470e894ba4ded97c59b-1683894008"
+    tag: "1c0cc7c59654a97661580bf5b56e77c59b90827b-1684500907"
 
   replica: 3
 
