@@ -91,14 +91,16 @@ mongodb:
 redis:
   enabled: true
   fullnameOverride: redis-ha
+  global:
+    imagePullSecrets:
+      - cognigy-registry-token
   auth:
     existingSecret: "agent-assist-redis-password"
     existingSecretPasswordKey: "REDIS_PASSWORD"
   image:
-    registry: docker.io
-    repository: bitnami/redis
-    tag: 7.0.7-debian-11-r7
-    pullSecrets: []
+    registry: cognigy.azurecr.io
+    repository: redis
+    tag: 7.0.10-debian-11-r8
   commonConfiguration: |-
     appendonly no
     protected-mode no
@@ -112,8 +114,8 @@ redis:
         cpu: 500m
         memory: 512Mi
       requests:
-        cpu: 200m
-        memory: 100Mi
+        cpu: 500m
+        memory: 512Mi
     podLabels:
       uniquezone: "aa-redis-ha"
     affinity:
@@ -131,10 +133,9 @@ redis:
   sentinel:
     enabled: true
     image:
-      registry: docker.io
-      repository: bitnami/redis-sentinel
-      tag: 7.0.7-debian-11-r6
-      pullSecrets: []
+      registry: cognigy.azurecr.io
+      repository: redis-sentinel
+      tag: 7.0.10-debian-11-r7
     automateClusterRecovery: true
     downAfterMilliseconds: 2000
     failoverTimeout: 10000
@@ -148,27 +149,26 @@ redis:
   metrics:
     enabled: true
     image:
-      registry: docker.io
-      repository: bitnami/redis-exporter
-      tag: 1.45.0-debian-11-r22
-      pullSecrets: []
+      registry: cognigy.azurecr.io
+      repository: redis-exporter
+      tag: 1.45.0-debian-11-r31
     resources:
       limits:
         cpu: 200m
         memory: 200Mi
       requests:
-        cpu: 50m
-        memory: 50Mi
+        cpu: 200m
+        memory: 200Mi
     serviceMonitor:
-      enabled: true
+      enabled: false
 
 backend:
   image:
     repository: cognigy.azurecr.io/agent-assist-backend
     pullPolicy: IfNotPresent
-    tag: "b30aab6e6d1e0048dc7670129689323b23c10221-1683280180"
-
+    tag: "c8e0006335af1cf3779904418739cbd7774dff5c-1686309680"
   replica: 3
+  priorityClassName: ""
 
   service:
     name: cognigy-agent-assist-backend
@@ -263,9 +263,9 @@ frontend:
   image:
     repository: cognigy.azurecr.io/agent-assist-frontend
     pullPolicy: IfNotPresent
-    tag: "1c0cc7c59654a97661580bf5b56e77c59b90827b-1684500907"
-
+    tag: "382f0545dbe250aa014854d35964df2ddd549ed8-1686036164"
   replica: 3
+  priorityClassName: ""
 
   service:
     name: cognigy-agent-assist-frontend
@@ -327,6 +327,7 @@ monitoring:
 # For testing purposes only
 loadTestingMode:
   enabled: false
+  priorityClassName: ""
 
 nodeSelector: {}
 

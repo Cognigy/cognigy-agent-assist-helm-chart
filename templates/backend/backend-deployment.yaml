@@ -30,6 +30,9 @@ spec:
       {{- include "image.pullSecrets" $ | nindent 6 }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if .Values.backend.priorityClassName }}
+      priorityClassName: {{ .Values.backend.priorityClassName }}
+      {{- end }}
       containers:
         - envFrom:
             - configMapRef:
