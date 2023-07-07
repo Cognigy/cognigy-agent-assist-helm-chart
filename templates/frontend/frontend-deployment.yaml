@@ -45,7 +45,7 @@ spec:
                   name: {{ template "agent-assist.backend.apiKey" . }}
                   key: api-key
           image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag | default .Chart.AppVersion }}"
-          name: {{ .Chart.Name }}-app
+          name: {{ .Chart.Name }}-frontend
           ports:
             - name: app
               containerPort: {{ int .Values.frontend.service.internalPort }}

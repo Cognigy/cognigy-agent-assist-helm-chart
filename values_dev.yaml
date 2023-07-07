@@ -26,33 +26,13 @@ mongodb:
   hosts: mongodb-0.mongodb-headless.mongodb.svc.cluster.local:27017
 
 redis:
-  enabled: true
-  fullnameOverride: redis-ha
-  auth:
-    existingSecret: "agent-assist-redis-password"
-    existingSecretPasswordKey: "REDIS_PASSWORD"
   image:
     registry: docker.io
     repository: bitnami/redis
     tag: 7.0.7-debian-11-r7
     pullSecrets: []
-  commonConfiguration: |-
-    appendonly no
-    protected-mode no
-    repl-diskless-sync no
-    save 60 1
-    stop-writes-on-bgsave-error no
   replica:
     replicaCount: 1
-    resources:
-      limits:
-        cpu: 500m
-        memory: 512Mi
-      requests:
-        cpu: 200m
-        memory: 100Mi
-    persistence:
-      enabled: false
   sentinel:
     enabled: true
     image:
@@ -60,18 +40,6 @@ redis:
       repository: bitnami/redis-sentinel
       tag: 7.0.7-debian-11-r6
       pullSecrets: []
-    automateClusterRecovery: true
-    downAfterMilliseconds: 2000
-    failoverTimeout: 10000
-    resources:
-      limits:
-        cpu: 500m
-        memory: 512Mi
-      requests:
-        cpu: 200m
-        memory: 100Mi
-  metrics:
-    enabled: false
 
 backend:
   image:

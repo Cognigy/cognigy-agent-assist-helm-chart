@@ -11,12 +11,10 @@ nameOverride: ""
 fullnameOverride: ""
 
 podAnnotations: {}
-podSecurityContext:
-  {}
+podSecurityContext: {}
   # fsGroup: 2000
 
-securityContext:
-  {}
+securityContext: {}
   # capabilities:
   #   drop:
   #   - ALL
@@ -166,7 +164,7 @@ backend:
   image:
     repository: cognigy.azurecr.io/agent-assist-backend
     pullPolicy: IfNotPresent
-    tag: "c8e0006335af1cf3779904418739cbd7774dff5c-1686309680"
+    tag: "b72a17b20f951be6874b90bcdf31a33b831b1619-1686826620"
   replica: 3
   priorityClassName: ""
 
@@ -175,8 +173,7 @@ backend:
     internalPort: 8000
     targetPort: 8000
     type: ClusterIP
-    annotations:
-      {}
+    annotations: {}
       # For example
       #  service.beta.kubernetes.io/aws-load-balancer-type: external
       #  service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
@@ -244,8 +241,7 @@ backend:
     REDIS_SENTINEL_PORT: "26379"
     REDIS_SENTINEL_HOST: "redis-ha-headless"
     REDIS_SENTINEL_MASTER_NAME: "mymaster"
-  resources:
-    {}
+  resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
     # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -263,7 +259,7 @@ frontend:
   image:
     repository: cognigy.azurecr.io/agent-assist-frontend
     pullPolicy: IfNotPresent
-    tag: "382f0545dbe250aa014854d35964df2ddd549ed8-1686036164"
+    tag: "f8958c4be51028e7d55a05e5b775d09693bc1a09-1686926532"
   replica: 3
   priorityClassName: ""
 
@@ -272,8 +268,7 @@ frontend:
     internalPort: 8000
     targetPort: 8000
     type: ClusterIP
-    annotations:
-      {}
+    annotations: {}
       # For example
       #  service.beta.kubernetes.io/aws-load-balancer-type: external
       #  service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
@@ -304,8 +299,7 @@ frontend:
   # Metrics configuration
   metrics:
     port: 8002
-  resources:
-    {}
+  resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
     # resources, such as Minikube. If you do want to specify resources, uncomment the following

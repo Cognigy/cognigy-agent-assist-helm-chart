@@ -10,5 +10,7 @@ data:
   NODE_ENV: 'production'
   SERVER_HOST: '0.0.0.0'
   SERVER_PORT: {{ .Values.backend.service.internalPort | quote }}
+  METRICS_PORT: {{ .Values.backend.metrics.port | quote }}
+  HEALTH_PORT: {{ .Values.backend.health.port | quote }}
   REDIS_HOST: {{template "agent-assist.redis.host" . }}
 {{ toYaml .Values.backend.configmap | nindent 2 }}

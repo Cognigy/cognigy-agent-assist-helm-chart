@@ -54,7 +54,7 @@ spec:
                   name: {{ template "agent-assist.backend.cognigyServiceHandoverApiAccessToken" . }}
                   key: api-access-token
           image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
-          name: {{ .Chart.Name }}-app
+          name: {{ .Chart.Name }}-backend
           ports:
             - name: app
               containerPort: {{ int .Values.backend.service.internalPort }}

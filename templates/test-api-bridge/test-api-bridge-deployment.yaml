@@ -45,7 +45,7 @@ spec:
                   name: {{ template "agent-assist.backend.apiKey" . }}
                   key: api-key
           image: "{{ .Values.loadTestingMode.testApiBridge.image.repository }}:{{ .Values.loadTestingMode.testApiBridge.image.tag | default .Chart.AppVersion }}"
-          name: {{ .Chart.Name }}-app
+          name: {{ .Chart.Name }}-api-test-bridge
           ports:
             - name: app
               containerPort: {{ int .Values.loadTestingMode.testApiBridge.service.internalPort }}
