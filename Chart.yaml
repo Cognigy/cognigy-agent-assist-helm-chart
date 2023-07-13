@@ -3,9 +3,9 @@ name: agent-assist
 description: A Helm chart to deploy Cognigy Agent Assist
 
 type: application
-version: "4.54.0"
-appVersion: "4.54.0-91936"
-kubeVersion: ">=v1.19.0-0,<v1.26.0-0"
+version: "4.55.0"
+appVersion: "4.55.0-98001"
+kubeVersion: ">=v1.19.0-0,<v1.27.0-0"
 icon: https://liveagent-trial.cognigy.ai/apple-icon-180x180.png
 dependencies:
   - name: redis
