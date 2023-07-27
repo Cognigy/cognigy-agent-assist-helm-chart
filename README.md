@@ -138,8 +138,6 @@ The following values are required to be filled in order to integrate with Cognig
 ```yaml
 # custom-values.yaml
 cognigyEnv:
-  # * means all organizations are allowed to be used in Agent Assist, otherwise specify a list of allowed organization IDs "org-id-1,org-id-2"
-  FEATURE_ENABLE_AGENT_ASSIST_WORKSPACE_WHITELIST: "*"
   AGENT_ASSIST_WORKSPACE_FRONTEND_URL_WITH_PROTOCOL: https://agent-assist.test
   AGENT_ASSIST_WORKSPACE_API_BASE_URL_WITH_PROTOCOL: https://api-agent-assist.test
 ```

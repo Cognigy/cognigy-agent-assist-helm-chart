@@ -83,7 +83,7 @@ mongodb:
   ## db-init generator image
   ##
   dbinit:
-    image: cognigy.azurecr.io/mongodb:5.0.16-debian-11-r3
+    image: cognigy.azurecr.io/mongodb:5.0.18-debian-11-r3
     securityContext: {}
 
 redis:
@@ -164,7 +164,7 @@ backend:
   image:
     repository: cognigy.azurecr.io/agent-assist-backend
     pullPolicy: IfNotPresent
-    tag: "3f2fbfc552f71cae2d0594814f6ab6165e207523-1688146389"
+    tag: "7d00415b5f777bf4e97b1c906d9d1316236ecef3-1688745825"
   replica: 3
   priorityClassName: ""
 
@@ -259,7 +259,7 @@ frontend:
   image:
     repository: cognigy.azurecr.io/agent-assist-frontend
     pullPolicy: IfNotPresent
-    tag: "2c04610953dffffaab03648ee05b3045cba35959-1688140260"
+    tag: "f3caa8a25ef29898e3ecfc83815f4dd369913932-1688717730"
   replica: 3
   priorityClassName: ""
 
