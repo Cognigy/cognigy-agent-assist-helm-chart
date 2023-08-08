@@ -1,0 +1,24 @@
+{{- if .Values.genesysNotificationsForwarder.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "agent-assist-genesys-notifications-forwarder.fullname" . }}
+  creationTimestamp: null
+  labels:
+    {{- include "agent-assist.selectorLabels" . | nindent 8 }}
+  {{- with .Values.genesysNotificationsForwarder.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  ports:
+    - name: {{ .Values.genesysNotificationsForwarder.service.name | quote}}
+      port: {{ int .Values.genesysNotificationsForwarder.service.internalPort }}
+      targetPort: {{ int .Values.genesysNotificationsForwarder.service.targetPort }}
+  type: {{ .Values.genesysNotificationsForwarder.service.type }}
+  selector:
+    {{- include "agent-assist.selectorLabels" . | nindent 4 }}
+    role: genesys-notifications-forwarder
+status:
+  loadBalancer: {}
+{{- end }}

@@ -164,7 +164,7 @@ backend:
   image:
     repository: cognigy.azurecr.io/agent-assist-backend
     pullPolicy: IfNotPresent
-    tag: "7d00415b5f777bf4e97b1c906d9d1316236ecef3-1688745825"
+    tag: "326f27c-1691480270"
   replica: 3
   priorityClassName: ""
 
@@ -188,8 +188,6 @@ backend:
             pathType: Prefix
             backend:
               service:
-                # Same value as service.name above
-                name: cognigy-agent-assist-backend
                 port:
                   number: 8000
     # tls:
@@ -259,7 +257,7 @@ frontend:
   image:
     repository: cognigy.azurecr.io/agent-assist-frontend
     pullPolicy: IfNotPresent
-    tag: "f3caa8a25ef29898e3ecfc83815f4dd369913932-1688717730"
+    tag: "935833c-1691480324"
   replica: 3
   priorityClassName: ""
 
@@ -283,8 +281,6 @@ frontend:
             pathType: Prefix
             backend:
               service:
-                # Same value as service.name above
-                name: cognigy-agent-assist-frontend
                 port:
                   number: 8000
     # tls:
@@ -314,6 +310,87 @@ frontend:
   configmap:
     # Google maps api token to have maps available for locations
     # GOOGLE_MAPS_API_TOKEN: "<your-google-map-api-token>"
+
+genesysNotificationsForwarder:
+  enabled: false
+  image:
+    repository: cognigy.azurecr.io/agent-assist-genesys-notifications-forwarder
+    pullPolicy: IfNotPresent
+    tag: "ae8daeaee508fc6416dab27d93a30516912b6b1e-1690306975"
+  replica: 1
+  priorityClassName: ""
+
+  service:
+    name: cognigy-agent-assist-genesys-notifications-forwarder
+    internalPort: 8000
+    targetPort: 8000
+    type: ClusterIP
+    annotations: {}
+      # For example
+      #  service.beta.kubernetes.io/aws-load-balancer-type: external
+      #  service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+      #  service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+
+  ingress:
+    enabled: true
+    hosts:
+      - host: "<host>"
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                port:
+                  number: 8000
+    # tls:
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  # Health configuration
+  health:
+    port: 8001
+
+  # Metrics configuration
+  metrics:
+    port: 8002
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 1000m
+    #   memory: 600Mi
+    # requests:
+    #   cpu: 1000m
+    #   memory: 400Mi
+
+  # The API key to use for authenticating the requests done to the service API
+  apiKey:
+    # Existing secret must have `api-key` as secret key
+    existingSecret: ""
+    # Optionally create the secret by setting the api key here (not recommended)
+    # value: ""
+
+  # Geneys Cloud Credentials
+  credentials:
+    # Existing secret must have `client-id` and 'client-secret' as secret keys
+    existingSecret: ""
+
+    # The Genesys Client ID to use for authenticating with the Genesys Cloud API
+    clientId:
+      # Optionally create the secret by setting the client ID here (not recommended)
+      # value: ""
+
+    # The Genesys Client Secret to use for authenticating with the Genesys Cloud API
+    clientSecret:
+      # Optionally create the secret by setting the client secret here (not recommended)
+      # value: ""
+
+  configmap:
+    # LOGGER_LEVEL: "debug"
+    # GENESYS_ENVIRONMENT: "mypurecloud.de"
 
 monitoring:
   enabled: false

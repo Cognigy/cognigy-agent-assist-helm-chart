@@ -1,0 +1,85 @@
+{{- if .Values.genesysNotificationsForwarder.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "agent-assist-genesys-notifications-forwarder.fullname" . }}
+  labels:
+    {{- include "agent-assist.labels" . | nindent 4 }}
+spec:
+  replicas: {{ int .Values.genesysNotificationsForwarder.replica }}
+  selector:
+    matchLabels:
+      {{- include "agent-assist.selectorLabels" . | nindent 6 }}
+      role: genesys-notifications-forwarder
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "agent-assist.selectorLabels" . | nindent 8 }}
+        role: genesys-notifications-forwarder
+    spec:
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector: {{- include "common.tplvalues.render" (dict "value" .Values.nodeSelector "context" $) | nindent 8 }}
+      {{- end }}
+      {{- include "image.pullSecrets" $ | nindent 6 }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if .Values.genesysNotificationsForwarder.priorityClassName }}
+      priorityClassName: {{ .Values.genesysNotificationsForwarder.priorityClassName }}
+      {{- end }}
+      containers:
+        - envFrom:
+            - configMapRef:
+                name: {{ template "agent-assist-genesys-notifications-forwarder.fullname" . }}
+          env:
+            - name: ACCESS_TOKEN_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "agent-assist.genesysNotificationsForwarder.apiKey" . }}
+                  key: api-key
+            - name: GENESYS_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "agent-assist.genesysNotificationsForwarder.credentials" . }}
+                  key: client-id
+            - name: GENESYS_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "agent-assist.genesysNotificationsForwarder.credentials" . }}
+                  key: client-secret
+          image: "{{ .Values.genesysNotificationsForwarder.image.repository }}:{{ .Values.genesysNotificationsForwarder.image.tag | default .Chart.AppVersion }}"
+          name: {{ .Chart.Name }}-backend
+          ports:
+            - name: app
+              containerPort: {{ int .Values.genesysNotificationsForwarder.service.internalPort }}
+            - name: metrics
+              containerPort: {{ int .Values.genesysNotificationsForwarder.metrics.port | default 8002  }}
+            - name: health
+              containerPort: {{ int .Values.genesysNotificationsForwarder.health.port | default 8001  }}
+          imagePullPolicy: {{ .Values.genesysNotificationsForwarder.image.pullPolicy }}
+          {{- with .Values.genesysNotificationsForwarder.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          startupProbe:
+            httpGet:
+              path: /health/startup
+              port: {{ int .Values.genesysNotificationsForwarder.health.port | default 8001 }}
+          livenessProbe:
+            httpGet:
+              path: /health/liveness
+              port: {{ int .Values.genesysNotificationsForwarder.health.port | default 8001  }}
+            failureThreshold: 3
+            initialDelaySeconds: 90
+            periodSeconds: 60
+            timeoutSeconds: 10
+    
+status: {}
+{{- end }}

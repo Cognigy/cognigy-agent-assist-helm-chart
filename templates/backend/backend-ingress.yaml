@@ -1,6 +1,7 @@
 {{- if .Values.backend.ingress.enabled -}}
 {{- $ingressApiIsStable := eq (include "grafana.ingress.isStable" .) "true" -}}
 {{- $ingressSupportsPathType := eq (include "grafana.ingress.supportsPathType" .) "true" -}}
+{{- $root := . -}}
 apiVersion: {{ include "grafana.ingress.apiVersion" . }}
 kind: Ingress
 metadata:
@@ -38,11 +39,11 @@ spec:
             backend:
             {{- if $ingressApiIsStable }}
               service:
-                name: {{ .backend.service.name }}
+                name: {{ $root.Values.backend.service.name }}
                 port:
                   number: {{ int .backend.service.port.number }}
             {{- else }}
-              serviceName: {{ .backend.service.name }}
+              serviceName: {{ $root.Values.backend.service.name }}
               servicePort: {{ int .backend.service.port.number }}
             {{- end }}
           {{- end }}

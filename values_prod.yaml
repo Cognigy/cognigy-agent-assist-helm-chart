@@ -28,8 +28,6 @@ backend:
             pathType: Prefix
             backend:
               service:
-                # Same value as service.name above
-                name: cognigy-agent-assist-backend
                 port:
                   number: 8000
     tls:
@@ -72,8 +70,6 @@ frontend:
             pathType: Prefix
             backend:
               service:
-                # Same value as service.name above
-                name: cognigy-agent-assist-frontend
                 port:
                   number: 8000
     tls:

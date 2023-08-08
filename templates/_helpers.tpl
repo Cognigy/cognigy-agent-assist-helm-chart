@@ -38,6 +38,13 @@ Frontend full name
 {{- end }}
 
 {{/*
+Genesys Notifications Forwarder full name
+*/}}
+{{- define "agent-assist-genesys-notifications-forwarder.fullname" -}}
+{{ include "agent-assist.fullname" . }}-genesys-notifications-forwarder
+{{- end }}
+
+{{/*
 Test API Bridge full name
 */}}
 {{- define "agent-assist-test-api-bridge.fullname" -}}
@@ -203,6 +210,28 @@ Set the service-handover api key secret
   {{- .Values.backend.cognigyServiceHandoverApiAccessToken.existingSecret | quote -}}
 {{- else -}}
   "cognigy-service-handover-api-access-token"
+{{- end -}}
+{{- end -}}
+
+{{/*
+Set the genesysNotificationsForwarder api key secret
+*/}}
+{{- define "agent-assist.genesysNotificationsForwarder.apiKey" -}}
+{{- if .Values.genesysNotificationsForwarder.apiKey.existingSecret -}}
+  {{- .Values.genesysNotificationsForwarder.apiKey.existingSecret | quote -}}
+{{- else -}}
+  "agent-assist-api-key"
+{{- end -}}
+{{- end -}}
+
+{{/*
+Set the genesysNotificationsForwarder api key secret
+*/}}
+{{- define "agent-assist.genesysNotificationsForwarder.credentials" -}}
+{{- if .Values.genesysNotificationsForwarder.credentials.existingSecret -}}
+  {{- .Values.genesysNotificationsForwarder.credentials.existingSecret | quote -}}
+{{- else -}}
+  "agent-assist-genesys-cloud-credentials"
 {{- end -}}
 {{- end -}}
 

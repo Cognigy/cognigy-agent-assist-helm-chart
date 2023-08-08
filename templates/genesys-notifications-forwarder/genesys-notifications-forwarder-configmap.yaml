@@ -1,0 +1,18 @@
+{{- if .Values.genesysNotificationsForwarder.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: {{ template "agent-assist-genesys-notifications-forwarder.fullname" . }}
+  labels:
+    {{- include "agent-assist.labels" . | nindent 4 }}
+
+data:
+  NODE_ENV: 'production'
+  SERVER_HOST: '0.0.0.0'
+  SERVER_PORT: {{ .Values.genesysNotificationsForwarder.service.internalPort | quote }}
+  METRICS_PORT: {{ .Values.genesysNotificationsForwarder.metrics.port | quote }}
+  HEALTH_PORT: {{ .Values.genesysNotificationsForwarder.health.port | quote }}
+  REDIS_HOST: {{template "agent-assist.redis.host" . }}
+{{ toYaml .Values.genesysNotificationsForwarder.configmap | nindent 2 }}
+{{- end }}

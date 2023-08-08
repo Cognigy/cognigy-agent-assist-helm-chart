@@ -1,25 +1,25 @@
-{{- if .Values.frontend.enabled -}}
-{{- if .Values.frontend.ingress.enabled -}}
+{{- if .Values.genesysNotificationsForwarder.enabled -}}
+{{- if .Values.genesysNotificationsForwarder.ingress.enabled -}}
 {{- $ingressApiIsStable := eq (include "grafana.ingress.isStable" .) "true" -}}
 {{- $ingressSupportsPathType := eq (include "grafana.ingress.supportsPathType" .) "true" -}}
 {{- $root := . -}}
 apiVersion: {{ include "grafana.ingress.apiVersion" . }}
 kind: Ingress
 metadata:
-  name: {{ include "agent-assist-frontend.fullname" . }}
+  name: {{ include "agent-assist-genesys-notifications-forwarder.fullname" . }}
   labels:
     {{- include "agent-assist.selectorLabels" . | nindent 4 }}
-  {{- if .Values.frontend.ingress.annotations }}
+  {{- if .Values.genesysNotificationsForwarder.ingress.annotations }}
   annotations:
-    {{- range $key, $value := .Values.frontend.ingress.annotations }}
+    {{- range $key, $value := .Values.genesysNotificationsForwarder.ingress.annotations }}
     {{ $key }}: {{ tpl $value $ | quote }}
     {{- end }}
   {{- end }}
 spec:
   ingressClassName: traefik
-  {{- if .Values.frontend.ingress.tls }}
+  {{- if .Values.genesysNotificationsForwarder.ingress.tls }}
   tls:
-    {{- range .Values.frontend.ingress.tls }}
+    {{- range .Values.genesysNotificationsForwarder.ingress.tls }}
     - hosts:
         {{- range .hosts }}
         - {{ . | quote }}
@@ -28,7 +28,7 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-    {{- range .Values.frontend.ingress.hosts }}
+    {{- range .Values.genesysNotificationsForwarder.ingress.hosts }}
     - host: {{ .host | quote }}
       http:
         paths:
@@ -40,14 +40,14 @@ spec:
             backend:
             {{- if $ingressApiIsStable }}
               service:
-                name: {{ $root.Values.frontend.service.name }}
+                name: {{ $root.Values.genesysNotificationsForwarder.service.name }}
                 port:
                   number: {{ int .backend.service.port.number }}
             {{- else }}
-              serviceName: {{ $root.Values.frontend.service.name }}
+              serviceName: {{ $root.Values.genesysNotificationsForwarder.service.name }}
               servicePort: {{ int .backend.service.port.number }}
             {{- end }}
           {{- end }}
     {{- end }}
   {{- end }}
-{{- end }}
+  {{- end }}
