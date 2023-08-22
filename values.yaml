@@ -164,7 +164,7 @@ backend:
   image:
     repository: cognigy.azurecr.io/agent-assist-backend
     pullPolicy: IfNotPresent
-    tag: "326f27c-1691480270"
+    tag: "47b1e4e-1691567631"
   replica: 3
   priorityClassName: ""
 
@@ -257,7 +257,7 @@ frontend:
   image:
     repository: cognigy.azurecr.io/agent-assist-frontend
     pullPolicy: IfNotPresent
-    tag: "935833c-1691480324"
+    tag: "1ebbcc0-1692699410"
   replica: 3
   priorityClassName: ""
 
@@ -316,7 +316,7 @@ genesysNotificationsForwarder:
   image:
     repository: cognigy.azurecr.io/agent-assist-genesys-notifications-forwarder
     pullPolicy: IfNotPresent
-    tag: "ae8daeaee508fc6416dab27d93a30516912b6b1e-1690306975"
+    tag: "eecb08c-1692620027"
   replica: 1
   priorityClassName: ""
 

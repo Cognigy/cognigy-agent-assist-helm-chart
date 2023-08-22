@@ -14,5 +14,6 @@ data:
   METRICS_PORT: {{ .Values.genesysNotificationsForwarder.metrics.port | quote }}
   HEALTH_PORT: {{ .Values.genesysNotificationsForwarder.health.port | quote }}
   REDIS_HOST: {{template "agent-assist.redis.host" . }}
+  APP_VERSION: "{{ .Chart.Version }}"
 {{ toYaml .Values.genesysNotificationsForwarder.configmap | nindent 2 }}
 {{- end }}

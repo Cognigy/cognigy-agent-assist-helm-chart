@@ -13,4 +13,5 @@ data:
   METRICS_PORT: {{ .Values.backend.metrics.port | quote }}
   HEALTH_PORT: {{ .Values.backend.health.port | quote }}
   REDIS_HOST: {{template "agent-assist.redis.host" . }}
+  APP_VERSION: "{{ .Chart.Version }}"
 {{ toYaml .Values.backend.configmap | nindent 2 }}

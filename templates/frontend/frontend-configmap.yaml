@@ -13,6 +13,7 @@ data:
   SERVER_PORT: {{ .Values.frontend.service.internalPort | quote }}
   METRICS_PORT: {{ .Values.frontend.metrics.port | quote }}
   HEALTH_PORT: {{ .Values.frontend.health.port | quote }}
+  APP_VERSION: "{{ .Chart.Version }}"
   {{- with (first .Values.backend.ingress.hosts) }}
   APP_AGENT_ASSIST_API_URL: "https://{{ .host }}"
   {{- end }}
