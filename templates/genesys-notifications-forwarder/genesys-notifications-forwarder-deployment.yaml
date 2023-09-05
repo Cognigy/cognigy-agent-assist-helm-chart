@@ -80,6 +80,14 @@ spec:
             initialDelaySeconds: 90
             periodSeconds: 60
             timeoutSeconds: 10
+          volumeMounts:
+            - name: redis-password
+              mountPath: /var/run/secrets/redis-password.conf
+              subPath: redis-password.conf
+      volumes:
+        - name: redis-password
+          secret:
+            secretName: agent-assist-redis-password
     
 status: {}
 {{- end }}

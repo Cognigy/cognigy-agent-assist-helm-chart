@@ -11,10 +11,12 @@ nameOverride: ""
 fullnameOverride: ""
 
 podAnnotations: {}
-podSecurityContext: {}
+podSecurityContext:
+  {}
   # fsGroup: 2000
 
-securityContext: {}
+securityContext:
+  {}
   # capabilities:
   #   drop:
   #   - ALL
@@ -98,7 +100,7 @@ redis:
   image:
     registry: cognigy.azurecr.io
     repository: redis
-    tag: 7.0.10-debian-11-r8
+    tag: 7.2.0-debian-11-r3
   commonConfiguration: |-
     appendonly no
     protected-mode no
@@ -133,7 +135,7 @@ redis:
     image:
       registry: cognigy.azurecr.io
       repository: redis-sentinel
-      tag: 7.0.10-debian-11-r7
+      tag: 7.2.0-debian-11-r3
     automateClusterRecovery: true
     downAfterMilliseconds: 2000
     failoverTimeout: 10000
@@ -149,7 +151,7 @@ redis:
     image:
       registry: cognigy.azurecr.io
       repository: redis-exporter
-      tag: 1.45.0-debian-11-r31
+      tag: 1.52.0-debian-11-r23
     resources:
       limits:
         cpu: 200m
@@ -164,7 +166,7 @@ backend:
   image:
     repository: cognigy.azurecr.io/agent-assist-backend
     pullPolicy: IfNotPresent
-    tag: "47b1e4e-1691567631"
+    tag: "48805fb-1692199263"
   replica: 3
   priorityClassName: ""
 
@@ -173,7 +175,8 @@ backend:
     internalPort: 8000
     targetPort: 8000
     type: ClusterIP
-    annotations: {}
+    annotations:
+      {}
       # For example
       #  service.beta.kubernetes.io/aws-load-balancer-type: external
       #  service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
@@ -239,7 +242,14 @@ backend:
     REDIS_SENTINEL_PORT: "26379"
     REDIS_SENTINEL_HOST: "redis-ha-headless"
     REDIS_SENTINEL_MASTER_NAME: "mymaster"
-  resources: {}
+    # Tracing
+    # TRACING_BASE_URL_WITH_PROTOCOL: ""
+    # TRACING_ERRORS_ENABLE: "true"
+    # TRACING_ENABLED: "true"
+    # TRACING_EVENTS_SAMPLE_RATE: "0"
+    # TRACING_SAMPLE_RATE: "0"
+  resources:
+    {}
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
     # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -257,7 +267,7 @@ frontend:
   image:
     repository: cognigy.azurecr.io/agent-assist-frontend
     pullPolicy: IfNotPresent
-    tag: "1ebbcc0-1692699410"
+    tag: "254615d-1692789438"
   replica: 3
   priorityClassName: ""
 
@@ -266,7 +276,8 @@ frontend:
     internalPort: 8000
     targetPort: 8000
     type: ClusterIP
-    annotations: {}
+    annotations:
+      {}
       # For example
       #  service.beta.kubernetes.io/aws-load-balancer-type: external
       #  service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
@@ -295,7 +306,8 @@ frontend:
   # Metrics configuration
   metrics:
     port: 8002
-  resources: {}
+  resources:
+    {}
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
     # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -310,13 +322,23 @@ frontend:
   configmap:
     # Google maps api token to have maps available for locations
     # GOOGLE_MAPS_API_TOKEN: "<your-google-map-api-token>"
+    # to enable sentry, fill out the values below. Add your dsn to the TRACING_BASE_URL_WITH_PROTOCOL setting.
+    # TRACING_BASE_URL_WITH_PROTOCOL: ""
+    # TRACING_SAMPLE_RATE: "0"
+    # TRACING_TRACES_SAMPLE_RATE: "0"
+    # TRACING_REPLAYS_ON_ERROR_SAMPLE_RATE: "0"
+    # TRACING_REPLAYS_SESSION_SAMPLE_RATE: "0"
+    # TRACING_TEAM_NAME: ""
+    # TRACING_RELEASE: ""
+    # TRACING_ENVIRONMENT: ""
+    # TRACING_MAX_BREADCRUMBS: "0"
 
 genesysNotificationsForwarder:
   enabled: false
   image:
     repository: cognigy.azurecr.io/agent-assist-genesys-notifications-forwarder
     pullPolicy: IfNotPresent
-    tag: "eecb08c-1692620027"
+    tag: "ca5468d-1693905622"
   replica: 1
   priorityClassName: ""
 
@@ -325,7 +347,8 @@ genesysNotificationsForwarder:
     internalPort: 8000
     targetPort: 8000
     type: ClusterIP
-    annotations: {}
+    annotations:
+      {}
       # For example
       #  service.beta.kubernetes.io/aws-load-balancer-type: external
       #  service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
@@ -354,7 +377,8 @@ genesysNotificationsForwarder:
   # Metrics configuration
   metrics:
     port: 8002
-  resources: {}
+  resources:
+    {}
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
     # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -391,6 +415,11 @@ genesysNotificationsForwarder:
   configmap:
     # LOGGER_LEVEL: "debug"
     # GENESYS_ENVIRONMENT: "mypurecloud.de"
+    # Redis Sentinel enabled
+    FEATURE_REDIS_SENTINEL_MODE_ENABLED: "true"
+    REDIS_SENTINEL_PORT: "26379"
+    REDIS_SENTINEL_HOST: "redis-ha-headless"
+    REDIS_SENTINEL_MASTER_NAME: "mymaster"
 
 monitoring:
   enabled: false
