@@ -12,6 +12,7 @@ Cognigy Agent Assist offers a variety of advanced features that empower agents t
 - Helm 3.8.0+
 - MongoDB Helm chart installed in the same cluster. Here is the [setup guide](https://github.com/Cognigy/cognigy-mongodb-helm-chart)
 - Cognigy.AI Helm chart installed in the same cluster. Here is the [setup guide](https://github.com/Cognigy/cognigy-ai-helm-chart)
+- For using Cognigy Live Agent with Cognigy Agent Assist, its Helm chart needs to be installed in the same cluster. Here is the [setup guide](https://docs.cognigy.com/live-agent/installation/deployment/installation-using-helm/)
 
 ## Configuration
 
@@ -179,6 +180,18 @@ serviceHandover:
           name: cognigy-agent-assist-workspace-credentials
           key: api-access-token
 ```
+
+### Live Agent integration (optional)
+
+To integrate Cognigy Agent Assist with Live Agent, you need to provide following values in the Live Agent Helm Chart `custom-values.yaml` file:
+
+```yaml
+configmap:
+  #...
+  FEATURE_USE_AGENT_ASSIST_WORKSPACE: "true"
+```
+
+And perform a helm upgrade as per the [Live Agent Helm Chart documentation](https://docs.cognigy.com/live-agent/installation/deployment/installation-updates/).
 
 ### Do testing without installing the Helm chart
 
