@@ -11,12 +11,10 @@ nameOverride: ""
 fullnameOverride: ""
 
 podAnnotations: {}
-podSecurityContext:
-  {}
+podSecurityContext: {}
   # fsGroup: 2000
 
-securityContext:
-  {}
+securityContext: {}
   # capabilities:
   #   drop:
   #   - ALL
@@ -175,8 +173,7 @@ backend:
     internalPort: 8000
     targetPort: 8000
     type: ClusterIP
-    annotations:
-      {}
+    annotations: {}
       # For example
       #  service.beta.kubernetes.io/aws-load-balancer-type: external
       #  service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
@@ -248,8 +245,7 @@ backend:
     # TRACING_ENABLED: "true"
     # TRACING_EVENTS_SAMPLE_RATE: "0"
     # TRACING_SAMPLE_RATE: "0"
-  resources:
-    {}
+  resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
     # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -267,7 +263,7 @@ frontend:
   image:
     repository: cognigy.azurecr.io/agent-assist-frontend
     pullPolicy: IfNotPresent
-    tag: "254615d-1692789438"
+    tag: "a47ace6-1694528707"
   replica: 3
   priorityClassName: ""
 
@@ -276,8 +272,7 @@ frontend:
     internalPort: 8000
     targetPort: 8000
     type: ClusterIP
-    annotations:
-      {}
+    annotations: {}
       # For example
       #  service.beta.kubernetes.io/aws-load-balancer-type: external
       #  service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
@@ -306,8 +301,7 @@ frontend:
   # Metrics configuration
   metrics:
     port: 8002
-  resources:
-    {}
+  resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
     # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -338,7 +332,7 @@ genesysNotificationsForwarder:
   image:
     repository: cognigy.azurecr.io/agent-assist-genesys-notifications-forwarder
     pullPolicy: IfNotPresent
-    tag: "ca5468d-1693905622"
+    tag: "c3326c9-1694622405"
   replica: 1
   priorityClassName: ""
 
@@ -347,8 +341,7 @@ genesysNotificationsForwarder:
     internalPort: 8000
     targetPort: 8000
     type: ClusterIP
-    annotations:
-      {}
+    annotations: {}
       # For example
       #  service.beta.kubernetes.io/aws-load-balancer-type: external
       #  service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
@@ -377,8 +370,7 @@ genesysNotificationsForwarder:
   # Metrics configuration
   metrics:
     port: 8002
-  resources:
-    {}
+  resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
     # resources, such as Minikube. If you do want to specify resources, uncomment the following

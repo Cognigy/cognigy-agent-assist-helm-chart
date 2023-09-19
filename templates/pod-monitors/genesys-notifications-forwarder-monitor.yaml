@@ -1,0 +1,17 @@
+{{- if .Values.monitoring.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: "prom-monitor-{{ template "agent-assist.fullname" . }}-genesys-notifications-forwarder"
+  namespace: monitoring
+spec:
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace | quote }}
+  podMetricsEndpoints:
+    - path: /metrics
+      port: metrics
+  selector:
+    matchLabels:
+      role: genesys-notifications-forwarder
+{{- end }}
