@@ -263,7 +263,7 @@ frontend:
   image:
     repository: cognigy.azurecr.io/agent-assist-frontend
     pullPolicy: IfNotPresent
-    tag: "a47ace6-1694528707"
+    tag: "be5f83d-1695975854"
   replica: 3
   priorityClassName: ""
 
@@ -332,7 +332,7 @@ genesysNotificationsForwarder:
   image:
     repository: cognigy.azurecr.io/agent-assist-genesys-notifications-forwarder
     pullPolicy: IfNotPresent
-    tag: "c3326c9-1694622405"
+    tag: "08653fa-1694622387"
   replica: 1
   priorityClassName: ""
 
