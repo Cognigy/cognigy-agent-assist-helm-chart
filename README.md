@@ -147,38 +147,24 @@ cognigyEnv:
 
 #### Agent Assist API Access Token for Cognigy.AI services
 
-Assuming that Agent Assist is deployed on a production cluster with the `values.yaml` existing secrets filled, there is a need to create a new secret in the `cognigy-ai` namespace containing the `apiKey.existingSecret` value defined in the Cognigy Agent Assist Helm chart `values.yaml` file. Once the secret is created, it needs to be added into the cognigy-ai helm chart values for the services like this:
+The API access token is used to authenticate the requests performed to the Agent Assist Workspace API. These includes the config and tile updates defined in the Agent Assist flows containing Agent Assist flow nodes.
+
+Assuming that Agent Assist is deployed on a production cluster with the `values.yaml` existing secrets filled, there is a need to create a new secret in the `cognigy-ai` namespace containing the `apiKey.existingSecret` value defined in the Cognigy Agent Assist Helm chart `values.yaml` file. Follow the instructions described in the Cognigy.AI helm chart `values.yaml` file to create the secret. Also remember to set the `enabled` property to `true`.
 
 ```yaml
-serviceAi:
-  # ...
-  extraEnvVars:
-    # ...
-    - name: AGENT_ASSIST_WORKSPACE_API_ACCESS_TOKEN
-      valueFrom:
-        secretKeyRef:
-          name: cognigy-agent-assist-workspace-credentials
-          key: api-access-token
+#...
 
-serviceEndpoint:
-  # ...
-  extraEnvVars:
-    # ...
-    - name: AGENT_ASSIST_WORKSPACE_API_ACCESS_TOKEN
-      valueFrom:
-        secretKeyRef:
-          name: cognigy-agent-assist-workspace-credentials
-          key: api-access-token
-
-serviceHandover:
-  # ...
-  extraEnvVars:
-    # ...
-    - name: AGENT_ASSIST_WORKSPACE_API_ACCESS_TOKEN
-      valueFrom:
-        secretKeyRef:
-          name: cognigy-agent-assist-workspace-credentials
-          key: api-access-token
+cognigyAgentAssist:
+  # Set to true to enable Agent Assist Workspace
+  enabled: true
+  accessToken: ""
+  ## Existing secret with agent-assist credentials. The secret must have the following key:
+  ##   "api-access-token": The access token for cognigy agent assist
+  ##
+  ## NOTE: When cognigyAgentAssist.existingSecret is set, clear text token passed in the previous parameter
+  ## "cognigyAgentAssist.accessToken" is ignored.
+  existingSecret: ""
+#...
 ```
 
 ### Live Agent integration (optional)

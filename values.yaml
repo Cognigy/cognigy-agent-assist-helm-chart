@@ -164,7 +164,7 @@ backend:
   image:
     repository: cognigy.azurecr.io/agent-assist-backend
     pullPolicy: IfNotPresent
-    tag: "48805fb-1692199263"
+    tag: "c2b885f-1696336516"
   replica: 3
   priorityClassName: ""
 
@@ -263,7 +263,7 @@ frontend:
   image:
     repository: cognigy.azurecr.io/agent-assist-frontend
     pullPolicy: IfNotPresent
-    tag: "be5f83d-1695975854"
+    tag: "fcd3721-1696339664"
   replica: 3
   priorityClassName: ""
 
