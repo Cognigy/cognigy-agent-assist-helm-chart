@@ -263,7 +263,7 @@ frontend:
   image:
     repository: cognigy.azurecr.io/agent-assist-frontend
     pullPolicy: IfNotPresent
-    tag: "fcd3721-1696339664"
+    tag: "f56e62a-1697724049"
   replica: 3
   priorityClassName: ""
 
