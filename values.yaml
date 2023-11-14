@@ -164,7 +164,7 @@ backend:
   image:
     repository: cognigy.azurecr.io/agent-assist-backend
     pullPolicy: IfNotPresent
-    tag: "c2b885f-1696336516"
+    tag: "1c8b475-1699880668"
   replica: 3
   priorityClassName: ""
 
@@ -233,7 +233,7 @@ backend:
     # Redis reconnect configuration
     REDIS_ENABLE_RECONNECT: "true"
     # Cognigy.AI integration (same for service-handover/service-endpoint)
-    COGNIGY_AI_ENDPOINT_URL_WITH_PROTOCOL: ""
+    ENDPOINT_BASE_URL_WITH_PROTOCOL: ""
     # Redis Sentinel enabled
     FEATURE_REDIS_SENTINEL_MODE_ENABLED: "true"
     REDIS_SENTINEL_PORT: "26379"
@@ -332,7 +332,7 @@ genesysNotificationsForwarder:
   image:
     repository: cognigy.azurecr.io/agent-assist-genesys-notifications-forwarder
     pullPolicy: IfNotPresent
-    tag: "08653fa-1694622387"
+    tag: "b1aed1b-1698680892"
   replica: 1
   priorityClassName: ""
 

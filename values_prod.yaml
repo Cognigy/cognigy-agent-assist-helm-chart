@@ -43,7 +43,7 @@ backend:
   configmap:
     FRONTEND_URL: ""
     ALLOWED_ORIGINS: ""
-    COGNIGY_AI_ENDPOINT_URL_WITH_PROTOCOL: ""
+    ENDPOINT_BASE_URL_WITH_PROTOCOL: ""
   resources:
     limits:
       cpu: 1000m
